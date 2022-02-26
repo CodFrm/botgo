@@ -52,7 +52,7 @@ func New(client *redis.Client, opts ...Option) *RedisManager {
 }
 
 // Start 启动 redis 的 session 管理器
-func (r *RedisManager) Start(apInfo *dto.WebsocketAP, token *token.Token, intents *dto.Intent) error {
+func (r *RedisManager) Start(ctx context.Context, apInfo *dto.WebsocketAP, token *token.Token, intents *dto.Intent) error {
 	defer log.Sync()
 	if err := manager.CheckSessionLimit(apInfo); err != nil {
 		log.Errorf("[ws/session/redis] session limited apInfo: %+v", apInfo)
@@ -67,7 +67,6 @@ func (r *RedisManager) Start(apInfo *dto.WebsocketAP, token *token.Token, intent
 
 	// 进行初始的session分发，抢锁，分发
 	// 锁60s，抢到锁的进程，需要每30s续期一次，只要自己还存活，就不能够让另外的进程抢到锁重新进行shards分发
-	ctx := context.Background()
 	distributeLock := lock.New(r.clusterKey, uuid.New().String(), r.client)
 	if err := distributeLock.Lock(ctx, distributeLockExpireTime); err == nil {
 		log.Infof("[ws/session/redis] got distribute lock! i will do distributeSession, key: %s", r.clusterKey)

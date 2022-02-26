@@ -2,6 +2,7 @@
 package local
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -19,11 +20,13 @@ func New() *ChanManager {
 
 // ChanManager 默认的本地 session manager 实现
 type ChanManager struct {
+	isStop      bool
+	stop        chan struct{}
 	sessionChan chan dto.Session
 }
 
 // Start 启动本地 session manager
-func (l *ChanManager) Start(apInfo *dto.WebsocketAP, token *token.Token, intents *dto.Intent) error {
+func (l *ChanManager) Start(ctx context.Context, apInfo *dto.WebsocketAP, token *token.Token, intents *dto.Intent) error {
 	defer log.Sync()
 	if err := manager.CheckSessionLimit(apInfo); err != nil {
 		log.Errorf("[ws/session/local] session limited apInfo: %+v", apInfo)
@@ -35,6 +38,8 @@ func (l *ChanManager) Start(apInfo *dto.WebsocketAP, token *token.Token, intents
 
 	// 按照shards数量初始化，用于启动连接的管理
 	l.sessionChan = make(chan dto.Session, apInfo.Shards)
+	l.stop = make(chan struct{})
+	l.isStop = false
 	for i := uint32(0); i < apInfo.Shards; i++ {
 		session := dto.Session{
 			URL:     apInfo.URL,
@@ -49,19 +54,33 @@ func (l *ChanManager) Start(apInfo *dto.WebsocketAP, token *token.Token, intents
 		l.sessionChan <- session
 	}
 
-	for session := range l.sessionChan {
-		// MaxConcurrency 代表的是每 5s 可以连多少个请求
-		time.Sleep(startInterval)
-		go l.newConnect(session)
+	for {
+		select {
+		case session := <-l.sessionChan:
+			time.Sleep(startInterval)
+			go l.newConnect(ctx, session)
+		case <-ctx.Done():
+			if !l.isStop {
+				close(l.stop)
+				l.isStop = true
+			}
+			return nil
+		}
 	}
 	return nil
+}
+
+func (l *ChanManager) Stop() {
+	if !l.isStop {
+		close(l.stop)
+	}
 }
 
 // newConnect 启动一个新的连接，如果连接在监听过程中报错了，或者被远端关闭了链接，需要识别关闭的原因，能否继续 resume
 // 如果能够 resume，则往 sessionChan 中放入带有 sessionID 的 session
 // 如果不能，则清理掉 sessionID，将 session 放入 sessionChan 中
 // session 的启动，交给 start 中的 for 循环执行，session 不自己递归进行重连，避免递归深度过深
-func (l *ChanManager) newConnect(session dto.Session) {
+func (l *ChanManager) newConnect(ctx context.Context, session dto.Session) {
 	defer func() {
 		// panic 留下日志，放回 session
 		if err := recover(); err != nil {
@@ -87,6 +106,17 @@ func (l *ChanManager) newConnect(session dto.Session) {
 		log.Errorf("[ws/session] Identify/Resume err %+v", err)
 		return
 	}
+	end := make(chan struct{})
+	defer func() {
+		close(end)
+	}()
+	go func() {
+		defer wsClient.Close()
+		select {
+		case <-ctx.Done():
+		case <-end:
+		}
+	}()
 	if err := wsClient.Listening(); err != nil {
 		log.Errorf("[ws/session] Listening err %+v", err)
 		currentSession := wsClient.Session()
