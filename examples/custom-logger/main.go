@@ -45,7 +45,7 @@ func main() {
 }
 
 // ATMessageEventHandler 实现处理 at 消息的回调
-func ATMessageEventHandler(api openapi.OpenAPI) websocket.ATMessageEventHandler {
+func ATMessageEventHandler(api openapi.OpenAPI) dto.ATMessageEventHandler {
 	return func(event *dto.WSPayload, data *dto.WSATMessageData) error {
 		log.Printf("[%s] %s", event.Type, data.Content)
 		input := strings.ToLower(message.ETLInput(data.Content))

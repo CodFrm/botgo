@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/tencent-connect/botgo/dto"
-	"github.com/tencent-connect/botgo/websocket"
-
 	"github.com/tidwall/gjson" // 由于回包的 d 类型不确定，gjson 用于从回包json中提取 d 并进行针对性的解析
 )
 
@@ -49,8 +47,8 @@ func parseAndHandle(event *dto.WSPayload) error {
 		return h(event, event.RawMessage)
 	}
 	// 透传handler，如果未注册具体类型的 handler，会统一投递到这个 handler
-	if websocket.DefaultHandlers.Plain != nil {
-		return websocket.DefaultHandlers.Plain(event, event.RawMessage)
+	if dto.DefaultHandlers.Plain != nil {
+		return dto.DefaultHandlers.Plain(event, event.RawMessage)
 	}
 	return nil
 }
@@ -60,8 +58,8 @@ func guildHandler(event *dto.WSPayload, message []byte) error {
 	if err := parseData(message, data); err != nil {
 		return err
 	}
-	if websocket.DefaultHandlers.Guild != nil {
-		return websocket.DefaultHandlers.Guild(event, data)
+	if dto.DefaultHandlers.Guild != nil {
+		return dto.DefaultHandlers.Guild(event, data)
 	}
 	return nil
 }
@@ -71,8 +69,8 @@ func channelHandler(event *dto.WSPayload, message []byte) error {
 	if err := parseData(message, data); err != nil {
 		return err
 	}
-	if websocket.DefaultHandlers.Channel != nil {
-		return websocket.DefaultHandlers.Channel(event, data)
+	if dto.DefaultHandlers.Channel != nil {
+		return dto.DefaultHandlers.Channel(event, data)
 	}
 	return nil
 }
@@ -82,8 +80,8 @@ func guildMemberHandler(event *dto.WSPayload, message []byte) error {
 	if err := parseData(message, data); err != nil {
 		return err
 	}
-	if websocket.DefaultHandlers.GuildMember != nil {
-		return websocket.DefaultHandlers.GuildMember(event, data)
+	if dto.DefaultHandlers.GuildMember != nil {
+		return dto.DefaultHandlers.GuildMember(event, data)
 	}
 	return nil
 }
@@ -93,8 +91,8 @@ func messageHandler(event *dto.WSPayload, message []byte) error {
 	if err := parseData(message, data); err != nil {
 		return err
 	}
-	if websocket.DefaultHandlers.Message != nil {
-		return websocket.DefaultHandlers.Message(event, data)
+	if dto.DefaultHandlers.Message != nil {
+		return dto.DefaultHandlers.Message(event, data)
 	}
 	return nil
 }
@@ -104,8 +102,8 @@ func messageReactionHandler(event *dto.WSPayload, message []byte) error {
 	if err := parseData(message, data); err != nil {
 		return err
 	}
-	if websocket.DefaultHandlers.MessageReaction != nil {
-		return websocket.DefaultHandlers.MessageReaction(event, data)
+	if dto.DefaultHandlers.MessageReaction != nil {
+		return dto.DefaultHandlers.MessageReaction(event, data)
 	}
 	return nil
 }
@@ -115,8 +113,8 @@ func atMessageHandler(event *dto.WSPayload, message []byte) error {
 	if err := parseData(message, data); err != nil {
 		return err
 	}
-	if websocket.DefaultHandlers.ATMessage != nil {
-		return websocket.DefaultHandlers.ATMessage(event, data)
+	if dto.DefaultHandlers.ATMessage != nil {
+		return dto.DefaultHandlers.ATMessage(event, data)
 	}
 	return nil
 }
@@ -126,8 +124,8 @@ func directMessageHandler(event *dto.WSPayload, message []byte) error {
 	if err := parseData(message, data); err != nil {
 		return err
 	}
-	if websocket.DefaultHandlers.DirectMessage != nil {
-		return websocket.DefaultHandlers.DirectMessage(event, data)
+	if dto.DefaultHandlers.DirectMessage != nil {
+		return dto.DefaultHandlers.DirectMessage(event, data)
 	}
 	return nil
 }
@@ -137,8 +135,8 @@ func audioHandler(event *dto.WSPayload, message []byte) error {
 	if err := parseData(message, data); err != nil {
 		return err
 	}
-	if websocket.DefaultHandlers.Audio != nil {
-		return websocket.DefaultHandlers.Audio(event, data)
+	if dto.DefaultHandlers.Audio != nil {
+		return dto.DefaultHandlers.Audio(event, data)
 	}
 	return nil
 }
@@ -153,8 +151,8 @@ func messageAuditHandler(event *dto.WSPayload, message []byte) error {
 	if err := parseData(message, data); err != nil {
 		return err
 	}
-	if websocket.DefaultHandlers.MessageAudit != nil {
-		return websocket.DefaultHandlers.MessageAudit(event, data)
+	if dto.DefaultHandlers.MessageAudit != nil {
+		return dto.DefaultHandlers.MessageAudit(event, data)
 	}
 	return nil
 }

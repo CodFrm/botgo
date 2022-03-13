@@ -52,7 +52,7 @@ func New(client *redis.Client, opts ...Option) *RedisManager {
 }
 
 // Start 启动 redis 的 session 管理器
-func (r *RedisManager) Start(ctx context.Context, apInfo *dto.WebsocketAP, token *token.Token, intents *dto.Intent) error {
+func (r *RedisManager) Start(ctx context.Context, apInfo *dto.WebsocketAP, token *token.Token, handlers *dto.EventParse) error {
 	defer log.Sync()
 	if err := manager.CheckSessionLimit(apInfo); err != nil {
 		log.Errorf("[ws/session/redis] session limited apInfo: %+v", apInfo)
@@ -71,7 +71,7 @@ func (r *RedisManager) Start(ctx context.Context, apInfo *dto.WebsocketAP, token
 	if err := distributeLock.Lock(ctx, distributeLockExpireTime); err == nil {
 		log.Infof("[ws/session/redis] got distribute lock! i will do distributeSession, key: %s", r.clusterKey)
 		// 抢到锁的进行初次分发
-		if err = r.distributeSession(apInfo, token, intents); err != nil {
+		if err = r.distributeSession(apInfo, token, handlers); err != nil {
 			log.Errorf("[ws/session/redis] distribute sessions failed: %v", err)
 			return err
 		}

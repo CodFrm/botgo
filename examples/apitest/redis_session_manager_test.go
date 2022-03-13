@@ -29,7 +29,7 @@ func Test_redisSessionManager(t *testing.T) {
 
 	t.Run(
 		"at message", func(t *testing.T) {
-			var message websocket.ATMessageEventHandler = func(event *dto.WSPayload, data *dto.WSATMessageData) error {
+			var message dto.ATMessageEventHandler = func(event *dto.WSPayload, data *dto.WSATMessageData) error {
 				log.Println(event, data)
 				return nil
 			}

@@ -70,55 +70,55 @@ func main() {
 }
 
 // ReadyHandler 自定义 ReadyHandler 感知连接成功事件
-func ReadyHandler() websocket.ReadyHandler {
+func ReadyHandler() dto.ReadyHandler {
 	return func(event *dto.WSPayload, data *dto.WSReadyData) {
 		log.Println("ready event receive: ", data)
 	}
 }
 
-func ErrorNotifyHandler() websocket.ErrorNotifyHandler {
+func ErrorNotifyHandler() dto.ErrorNotifyHandler {
 	return func(err error) {
 		log.Println("error notify receive: ", err)
 	}
 }
 
 // ATMessageEventHandler 实现处理 at 消息的回调
-func ATMessageEventHandler() websocket.ATMessageEventHandler {
+func ATMessageEventHandler() dto.ATMessageEventHandler {
 	return func(event *dto.WSPayload, data *dto.WSATMessageData) error {
 		input := strings.ToLower(message.ETLInput(data.Content))
 		return processor.ProcessMessage(input, data)
 	}
 }
 
-func GuildEventHandler() websocket.GuildEventHandler {
+func GuildEventHandler() dto.GuildEventHandler {
 	return func(event *dto.WSPayload, data *dto.WSGuildData) error {
 		fmt.Println(data)
 		return nil
 	}
 }
 
-func ChannelEventHandler() websocket.ChannelEventHandler {
+func ChannelEventHandler() dto.ChannelEventHandler {
 	return func(event *dto.WSPayload, data *dto.WSChannelData) error {
 		fmt.Println(data)
 		return nil
 	}
 }
 
-func MemberEventHandler() websocket.GuildMemberEventHandler {
+func MemberEventHandler() dto.GuildMemberEventHandler {
 	return func(event *dto.WSPayload, data *dto.WSGuildMemberData) error {
 		fmt.Println(data)
 		return nil
 	}
 }
 
-func DirectMessageHandler() websocket.DirectMessageEventHandler {
+func DirectMessageHandler() dto.DirectMessageEventHandler {
 	return func(event *dto.WSPayload, data *dto.WSDirectMessageData) error {
 		fmt.Println(data)
 		return nil
 	}
 }
 
-func CreateMessageHandler() websocket.MessageEventHandler {
+func CreateMessageHandler() dto.MessageEventHandler {
 	return func(event *dto.WSPayload, data *dto.WSMessageData) error {
 		fmt.Println(data)
 		return nil

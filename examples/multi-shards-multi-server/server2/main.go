@@ -10,7 +10,7 @@ import (
 	"github.com/tencent-connect/botgo"
 	"github.com/tencent-connect/botgo/sessions/remote"
 	"github.com/tencent-connect/botgo/token"
-	"github.com/tencent-connect/botgo/websocket"
+	handler2 "github.com/tencent-connect/botgo/websocket"
 )
 
 func main() {
@@ -35,7 +35,7 @@ func main() {
 		log.Fatalln(err)
 	}
 	// 根据不同的回调，生成 intents
-	intent := websocket.RegisterHandlers(handler.ATMessageEventHandler(api))
+	intent := handler2.RegisterHandlers(handler.ATMessageEventHandler(api))
 	// 指定需要启动的分片数为2
 	wsInfo.Shards = 2
 	if err = botgo.NewSessionManager().Start(wsInfo, botToken, &intent); err != nil {

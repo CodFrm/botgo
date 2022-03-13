@@ -15,7 +15,7 @@ func Test_websocket(t *testing.T) {
 
 	t.Run(
 		"at message", func(t *testing.T) {
-			var message websocket.ATMessageEventHandler = func(event *dto.WSPayload, data *dto.WSATMessageData) error {
+			var message dto.ATMessageEventHandler = func(event *dto.WSPayload, data *dto.WSATMessageData) error {
 				log.Println(event, data)
 				return nil
 			}
@@ -25,7 +25,7 @@ func Test_websocket(t *testing.T) {
 	)
 	t.Run(
 		"at message assign shard to 2", func(t *testing.T) {
-			var message websocket.ATMessageEventHandler = func(event *dto.WSPayload, data *dto.WSATMessageData) error {
+			var message dto.ATMessageEventHandler = func(event *dto.WSPayload, data *dto.WSATMessageData) error {
 				log.Println(event, data)
 				return nil
 			}
@@ -36,11 +36,11 @@ func Test_websocket(t *testing.T) {
 	)
 	t.Run(
 		"at message and guild event", func(t *testing.T) {
-			var message websocket.ATMessageEventHandler = func(event *dto.WSPayload, data *dto.WSATMessageData) error {
+			var message dto.ATMessageEventHandler = func(event *dto.WSPayload, data *dto.WSATMessageData) error {
 				log.Println(event, data)
 				return nil
 			}
-			var guildEvent websocket.GuildEventHandler = func(event *dto.WSPayload, data *dto.WSGuildData) error {
+			var guildEvent dto.GuildEventHandler = func(event *dto.WSPayload, data *dto.WSGuildData) error {
 				log.Println(event, data)
 				return nil
 			}
@@ -50,7 +50,7 @@ func Test_websocket(t *testing.T) {
 	)
 	t.Run(
 		"message reaction", func(t *testing.T) {
-			var message websocket.MessageReactionEventHandler = func(
+			var message dto.MessageReactionEventHandler = func(
 				event *dto.WSPayload, data *dto.WSMessageReactionData,
 			) error {
 				log.Println(event, data)

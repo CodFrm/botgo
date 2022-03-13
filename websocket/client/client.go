@@ -98,9 +98,9 @@ func (c *Client) Listening() error {
 			if wss.IsUnexpectedCloseError(err, 4009) {
 				err = errs.New(errs.CodeConnCloseCantResume, err.Error())
 			}
-			if websocket.DefaultHandlers.ErrorNotify != nil {
+			if dto.DefaultHandlers.ErrorNotify != nil {
 				// 通知到使用方错误
-				websocket.DefaultHandlers.ErrorNotify(err)
+				dto.DefaultHandlers.ErrorNotify(err)
 			}
 			return err
 		case <-c.heartBeatTicker.C:
@@ -145,13 +145,16 @@ func (c *Client) Resume() error {
 // Identify 对一个连接进行鉴权，并声明监听的 shard 信息
 func (c *Client) Identify() error {
 	// 避免传错 intent
-	if c.session.Intent == 0 {
-		c.session.Intent = dto.IntentGuilds
+	var intent dto.Intent = 0
+	if c.session.Handlers == nil {
+		intent = dto.IntentGuilds
+	} else {
+		intent = c.session.Handlers.Intent()
 	}
 	event := &dto.WSPayload{
 		Data: &dto.WSIdentityData{
 			Token:   c.session.Token.GetString(),
-			Intents: c.session.Intent,
+			Intents: intent,
 			Shard: []uint32{
 				c.session.Shards.ShardID,
 				c.session.Shards.ShardCount,
@@ -216,11 +219,18 @@ func (c *Client) listenMessageAndHandle() {
 			continue
 		}
 		// 解析具体事件，并投递给业务注册的 handler
-		if err := parseAndHandle(event); err != nil {
+		if err := c.parseAndHandle(event); err != nil {
 			log.Errorf("%s parseAndHandle failed, %v", c.session, err)
 		}
 	}
 	log.Infof("%s message queue is closed", c.session)
+}
+
+func (c *Client) parseAndHandle(event *dto.WSPayload) error {
+	if h, ok := c.session.Handlers.FuncMap()[event.OPCode][event.Type]; ok {
+		return h(event, event.RawMessage)
+	}
+	return parseAndHandle(event)
 }
 
 func (c *Client) saveSeq(seq uint32) {
@@ -273,7 +283,7 @@ func (c *Client) readyHandler(event *dto.WSPayload) {
 		Bot:      readyData.User.Bot,
 	}
 	// 调用自定义的 ready 回调
-	if websocket.DefaultHandlers.Ready != nil {
-		websocket.DefaultHandlers.Ready(event, readyData)
+	if dto.DefaultHandlers.Ready != nil {
+		dto.DefaultHandlers.Ready(event, readyData)
 	}
 }

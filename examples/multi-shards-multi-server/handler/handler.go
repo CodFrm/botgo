@@ -10,11 +10,10 @@ import (
 	"github.com/tencent-connect/botgo/dto"
 	"github.com/tencent-connect/botgo/dto/message"
 	"github.com/tencent-connect/botgo/openapi"
-	"github.com/tencent-connect/botgo/websocket"
 )
 
 // ATMessageEventHandler 实现处理 at 消息的回调
-func ATMessageEventHandler(api openapi.OpenAPI) websocket.ATMessageEventHandler {
+func ATMessageEventHandler(api openapi.OpenAPI) dto.ATMessageEventHandler {
 	return func(event *dto.WSPayload, data *dto.WSATMessageData) error {
 		log.Printf("[%s] guildID is %s, content is %s", event.Type, data.GuildID, data.Content)
 		if _, err := api.PostMessage(context.Background(), data.ChannelID,

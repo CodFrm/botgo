@@ -29,18 +29,18 @@ type ShardConfig struct {
 
 // Session 连接的 session 结构，包括链接的所有必要字段
 type Session struct {
-	ID      string
-	URL     string
-	Token   token.Token
-	Intent  Intent
-	LastSeq uint32
-	Shards  ShardConfig
+	ID       string
+	URL      string
+	Token    token.Token
+	LastSeq  uint32
+	Shards   ShardConfig
+	Handlers *EventParse
 }
 
 // String 输出session字符串
 func (s *Session) String() string {
 	return fmt.Sprintf("[ws][ID:%s][Shard:(%d/%d)][Intent:%d]",
-		s.ID, s.Shards.ShardID, s.Shards.ShardCount, s.Intent)
+		s.ID, s.Shards.ShardID, s.Shards.ShardCount, s.Handlers.Intent())
 }
 
 // WSUser 当前连接的用户信息
